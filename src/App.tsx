@@ -126,8 +126,8 @@ const App: React.FC = () => {
   };
 
   return (
-      <div className="min-h-screen bg-gray-900 text-white">
-        <div className="container mx-auto px-4 py-8 max-w-5xl">
+      <div className="flex flex-col min-h-screen items-start gap-6 px-app-x py-app-y bg-main-dark text-white">
+        <div className="w-full">
           <h1 className="text-2xl font-semibold text-center mb-2">Secure File Manager</h1>
           <p className="text-center text-sm mb-6">
             Our tool runs entirely on your device, keeping all actions local and your files private.
@@ -138,7 +138,7 @@ const App: React.FC = () => {
           <FileDropZone onFileDrop={handleFileDrop} />
 
           {files.length > 0 && (
-              <div className="mt-4">
+              <div className="mt-6">
                 <FileList
                     files={files}
                     onDeleteFile={handleDeleteFile}
@@ -146,10 +146,10 @@ const App: React.FC = () => {
                     showLess={showLess}
                 />
 
-                <div className="flex justify-between items-center text-xs text-gray-400 mt-2 mb-6">
+                <div className="flex justify-between items-center text-xs text-gray-300 mt-2 mb-6">
                   <div>Total {files.length} files • Approximately {(totalSize / (1024 * 1024)).toFixed(2)} MB</div>
                   <button
-                      className="flex items-center text-gray-400 hover:text-gray-300"
+                      className="flex items-center text-gray-300 hover:text-white"
                       onClick={toggleShowLess}
                   >
                     {showLess ? 'SHOW ALL' : 'SHOW LESS'}
@@ -159,15 +159,19 @@ const App: React.FC = () => {
                   </button>
                 </div>
 
+                <div className="divider"></div>
+
                 <ActionPanel
                     actions={actions}
                     onAddAction={addAction}
                     onDeleteAction={deleteAction}
                 />
 
-                <div className="flex items-center justify-between mt-8">
+                <div className="divider"></div>
+
+                <div className="flex items-center justify-between mt-6">
                   <button
-                      className="flex items-center text-indigo-400 text-sm"
+                      className="flex items-center text-brand-500 text-sm"
                       onClick={saveActionSet}
                   >
                     <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -177,7 +181,7 @@ const App: React.FC = () => {
                   </button>
 
                   <button
-                      className="bg-indigo-500 hover:bg-indigo-600 text-white py-2 px-6 rounded"
+                      className="bg-brand-500 hover:bg-opacity-90 text-white py-2 px-6 rounded"
                       onClick={processAndDownload}
                       disabled={isProcessing}
                   >
@@ -186,7 +190,7 @@ const App: React.FC = () => {
                 </div>
 
                 {processedFiles > 0 && (
-                    <div className="text-xs text-gray-400 mt-2 text-right">
+                    <div className="text-xs text-gray-300 mt-2 text-right">
                       Total {processedFiles} files • Approximately {(totalSize / (1024 * 1024)).toFixed(2)} MB
                     </div>
                 )}

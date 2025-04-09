@@ -3,6 +3,20 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer components {
+  .all-\[unset\] {
+    all: unset;
+  }
+}
+
+:root {
+  --permitives-tokens-color-base-white: rgba(255, 255, 255, 1);
+  --permitives-tokens-color-brand-500: rgba(97, 114, 243, 1);
+  --permitives-tokens-color-gray-light-mode-300: rgba(208, 213, 221, 1);
+  --variable-collection-main-dark: rgba(201, 179, 255, 1);
+  --variable-collection-mogador-green: rgba(58, 77, 87, 1);
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -10,10 +24,17 @@ body {
   sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  @apply bg-gray-900 text-white;
+  @apply bg-main-dark text-white;
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
   monospace;
+}
+
+.divider {
+  width: 100%;
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.1);
+  margin: 1.5rem 0;
 }
