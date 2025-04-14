@@ -74,12 +74,14 @@ const App: React.FC = () => {
     setShowLess(!showLess);
   };
 
+// In App.tsx, update the processAndDownload function
   const processAndDownload = async () => {
     setIsProcessing(true);
+    setProcessedFiles(0);
 
-    // Simulate processing files
-    const totalFiles = files.length;
-    for (let i = 0; i < totalFiles; i++) {
+    // Process files one by one
+    for (let i = 0; i < files.length; i++) {
+      // Mark current file as processing
       setFiles(prevFiles =>
           prevFiles.map((file, index) =>
               index === i
@@ -88,9 +90,20 @@ const App: React.FC = () => {
           )
       );
 
-      // Simulate progress
-      for (let progress = 0; progress <= 100; progress += 10) {
-        await new Promise(resolve => setTimeout(resolve, 100));
+      // Simulate different processing times based on file type
+      const processingSteps = files[i].format === 'image' ? 5 :
+          files[i].format === 'pdf' ? 10 : 8;
+
+      // Process in steps with realistic timing
+      for (let step = 1; step <= processingSteps; step++) {
+        const progress = Math.floor((step / processingSteps) * 100);
+
+        // Add random delay to simulate processing time (200-800ms per step)
+        await new Promise(resolve =>
+            setTimeout(resolve, Math.floor(Math.random() * 600) + 200)
+        );
+
+        // Update progress
         setFiles(prevFiles =>
             prevFiles.map((file, index) =>
                 index === i
@@ -100,10 +113,11 @@ const App: React.FC = () => {
         );
       }
 
+      // Mark as complete
       setFiles(prevFiles =>
           prevFiles.map((file, index) =>
               index === i
-                  ? { ...file, status: ProcessStatus.Completed }
+                  ? { ...file, status: ProcessStatus.Completed, progress: 100 }
                   : file
           )
       );
@@ -111,22 +125,22 @@ const App: React.FC = () => {
       setProcessedFiles(i + 1);
     }
 
-    // In a real app, you would actually process files according to the selected actions
-    // and then generate download links or trigger downloads
-
     setIsProcessing(false);
 
-    // Simulate download of processed files - in a real app you'd create actual file downloads
-    alert('Files processed successfully! Download would start now in a real application.');
+    // Show completion message
+    setTimeout(() => {
+      alert('All files processed successfully! Download would start now in a real application.');
+    }, 500);
   };
 
-  const saveActionSet = () => {
+  const
+      ActionSet = () => {
     // In a real app, this would save the current actions to local storage or IndexedDB
     alert('Action set saved successfully!');
   };
 
   return (
-      <div className="flex flex-col min-h-screen items-start gap-6 px-app-x py-app-y bg-main-dark text-white">
+      <div className="flex flex-col min-h-screen items-start gap-6 px-4 sm:px-8 md:px-12 lg:px-16 py-6 md:py-app-y bg-main-dark text-white max-w-7xl mx-auto w-full">
         <div className="w-full">
           <h1 className="text-2xl font-semibold text-center mb-2">Secure File Manager</h1>
           <p className="text-center text-sm mb-6">
@@ -170,18 +184,26 @@ const App: React.FC = () => {
                 <div className="divider"></div>
 
                 <div className="flex items-center justify-between mt-6">
+                  // In App.tsx, update the save action set button
                   <button
-                      className="flex items-center text-brand-500 text-sm"
+                      className="group flex items-center text-brand-500 hover:text-white transition-colors text-sm"
                       onClick={saveActionSet}
                   >
-                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-                    </svg>
+                    <div className="w-6 h-6 flex items-center justify-center rounded mr-2 bg-brand-500/10 group-hover:bg-brand-500 transition-colors">
+                      <svg
+                          className="w-4 h-4 text-brand-500 group-hover:text-white transition-colors"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                      </svg>
+                    </div>
                     Save this action set
                   </button>
 
                   <button
-                      className="bg-brand-500 hover:bg-opacity-90 text-white py-2 px-6 rounded"
+                      className="bg-brand-500 hover:bg-brand-600 text-white py-2 px-6 rounded-md transition-colors"
                       onClick={processAndDownload}
                       disabled={isProcessing}
                   >
