@@ -134,7 +134,7 @@ const App: React.FC = () => {
   };
 
   const
-      ActionSet = () => {
+      saveActionSet = () => {
     // In a real app, this would save the current actions to local storage or IndexedDB
     alert('Action set saved successfully!');
   };
