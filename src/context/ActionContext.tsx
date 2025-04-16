@@ -10,6 +10,7 @@ type ActionContextType = {
     updateAction: (id: string, options: Record<string, string>) => void;
     setActions: (actions: ActionType[]) => void;
     clearActions: () => void;
+    reorderActions: (startIndex: number, endIndex: number) => void;
 };
 
 // Create context with default values
@@ -20,6 +21,7 @@ const ActionContext = createContext<ActionContextType>({
     updateAction: () => {},
     setActions: () => {},
     clearActions: () => {},
+    reorderActions: () => {},
 });
 
 // Define action types for reducer
@@ -28,7 +30,8 @@ type ActionDispatch =
     | { type: 'DELETE_ACTION'; payload: string }
     | { type: 'UPDATE_ACTION'; payload: { id: string; options: Record<string, string> } }
     | { type: 'SET_ACTIONS'; payload: ActionType[] }
-    | { type: 'CLEAR_ACTIONS' };
+    | { type: 'CLEAR_ACTIONS' }
+    | { type: 'REORDER_ACTIONS'; payload: { startIndex: number; endIndex: number } };
 
 // Reducer function
 const actionReducer = (state: ActionType[], action: ActionDispatch): ActionType[] => {
@@ -51,6 +54,14 @@ const actionReducer = (state: ActionType[], action: ActionDispatch): ActionType[
 
         case 'CLEAR_ACTIONS':
             return [];
+
+        case 'REORDER_ACTIONS': {
+            const { startIndex, endIndex } = action.payload;
+            const result = Array.from(state);
+            const [removed] = result.splice(startIndex, 1);
+            result.splice(endIndex, 0, removed);
+            return result;
+        }
 
         default:
             return state;
@@ -91,6 +102,14 @@ export const ActionProvider: React.FC<{children: React.ReactNode}> = ({ children
         dispatch({ type: 'CLEAR_ACTIONS' });
     };
 
+    // Reorder actions
+    const reorderActions = (startIndex: number, endIndex: number) => {
+        dispatch({
+            type: 'REORDER_ACTIONS',
+            payload: { startIndex, endIndex }
+        });
+    };
+
     return (
         <ActionContext.Provider
             value={{
@@ -99,7 +118,8 @@ export const ActionProvider: React.FC<{children: React.ReactNode}> = ({ children
                 deleteAction,
                 updateAction,
                 setActions,
-                clearActions
+                clearActions,
+                reorderActions
             }}
         >
             {children}

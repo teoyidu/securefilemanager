@@ -8,6 +8,8 @@ import FilePreview from './components/FilePreview';
 import ProcessingStatus from './components/ProcessingStatus';
 import ProcessingSummary from './components/ProcessingSummary';
 import SavedActionSets from './components/SavedActionSets';
+import ResponsiveLayout from './components/ResponsiveLayout';
+import Header from './components/Header';
 import { useApp, useFiles, useActions } from './context';
 import { fileService } from './services/api';
 import { storageService } from './services/localStorage';

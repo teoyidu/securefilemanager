@@ -1,22 +1,27 @@
+// src/context/index.tsx
 import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
-import { AppContextProvider } from './context';
+import { FileProvider } from './FileContext';
+import { ActionProvider } from './ActionContext';
+import { AppProvider } from './AppContext';
+import { ThemeProvider } from './ThemeContext';
 
-const root = ReactDOM.createRoot(
-    document.getElementById('root') as HTMLElement
-);
-root.render(
-    <React.StrictMode>
-        <AppContextProvider>
-            <App />
-        </AppContextProvider>
-    </React.StrictMode>
-);
+// Root provider that combines all contexts
+export const AppContextProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
+    return (
+        <ThemeProvider>
+            <AppProvider>
+                <FileProvider>
+                    <ActionProvider>
+                        {children}
+                    </ActionProvider>
+                </FileProvider>
+            </AppProvider>
+        </ThemeProvider>
+    );
+};
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+// Re-export all hooks for easy access
+export { useApp } from './AppContext';
+export { useFiles } from './FileContext';
+export { useActions } from './ActionContext';
+export { useTheme } from './ThemeContext';

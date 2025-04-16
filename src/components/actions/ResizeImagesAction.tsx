@@ -1,6 +1,9 @@
 // src/components/actions/ResizeImagesAction.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ActionType } from '../../types';
+import FormInput from '../FormInput';
+import { validateNumber } from '../../utils/validation';
+import { useActions } from '../../context';
 
 interface ResizeImagesActionProps {
     action: ActionType;
@@ -8,12 +11,50 @@ interface ResizeImagesActionProps {
 }
 
 const ResizeImagesAction: React.FC<ResizeImagesActionProps> = ({ action, onDelete }) => {
-    const [resizeOption, setResizeOption] = useState<string>('percentage');
-    const [percentage, setPercentage] = useState<string>('50');
-    const [width, setWidth] = useState<string>('800');
-    const [height, setHeight] = useState<string>('600');
-    const [maintainAspectRatio, setMaintainAspectRatio] = useState<boolean>(true);
-    const [outputFormat, setOutputFormat] = useState<string>('original');
+    const { updateAction } = useActions();
+    const [errors, setErrors] = useState<Record<string, string>>({});
+
+    // Initialize state from action options or defaults
+    const [resizeOption, setResizeOption] = useState<string>(
+        action.options?.resizeOption || 'percentage'
+    );
+    const [percentage, setPercentage] = useState<string>(
+        action.options?.percentage || '50'
+    );
+    const [width, setWidth] = useState<string>(
+        action.options?.width || '800'
+    );
+    const [height, setHeight] = useState<string>(
+        action.options?.height || '600'
+    );
+    const [maintainAspectRatio, setMaintainAspectRatio] = useState<boolean>(
+        action.options?.maintainAspectRatio !== 'false'
+    );
+    const [outputFormat, setOutputFormat] = useState<string>(
+        action.options?.outputFormat || 'original'
+    );
+
+    // Update action options when form values change
+    useEffect(() => {
+        updateAction(action.id, {
+            resizeOption,
+            percentage,
+            width,
+            height,
+            maintainAspectRatio: maintainAspectRatio.toString(),
+            outputFormat
+        });
+    }, [resizeOption, percentage, width, height, maintainAspectRatio, outputFormat]);
+
+    // Validate percentage input
+    const validatePercentage = (value: string) => {
+        return validateNumber(value, 'Percentage', 1, 100);
+    };
+
+    // Validate width/height inputs
+    const validateDimension = (value: string, fieldName: string) => {
+        return validateNumber(value, fieldName, 1);
+    };
 
     return (
         <div className="mt-6">
@@ -30,35 +71,34 @@ const ResizeImagesAction: React.FC<ResizeImagesActionProps> = ({ action, onDelet
             </div>
 
             <div className="space-y-4">
-                <div className="flex-grow">
-                    <div className="relative">
-                        <select
-                            value={resizeOption}
-                            onChange={(e) => setResizeOption(e.target.value)}
-                            className="appearance-none bg-[#2d2d2d] border border-[#3c3c3c] text-white py-2 px-4 pr-8 rounded w-full focus:outline-none focus:bg-[#3c3c3c]"
-                        >
-                            <option value="percentage">Scale by percentage</option>
-                            <option value="dimensions">Set specific dimensions</option>
-                            <option value="maxWidth">Set maximum width</option>
-                            <option value="maxHeight">Set maximum height</option>
-                        </select>
-                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </div>
-                    </div>
-                </div>
+                <FormInput
+                    type="select"
+                    id={`resize-option-${action.id}`}
+                    name="resizeOption"
+                    value={resizeOption}
+                    onChange={(e) => setResizeOption(e.target.value)}
+                    label="Resize method"
+                    options={[
+                        { value: 'percentage', label: 'Scale by percentage' },
+                        { value: 'dimensions', label: 'Set specific dimensions' },
+                        { value: 'maxWidth', label: 'Set maximum width' },
+                        { value: 'maxHeight', label: 'Set maximum height' }
+                    ]}
+                />
 
                 {resizeOption === 'percentage' && (
                     <div className="flex items-center space-x-2">
-                        <input
+                        <FormInput
                             type="number"
-                            min="1"
-                            max="100"
+                            id={`percentage-${action.id}`}
+                            name="percentage"
                             value={percentage}
                             onChange={(e) => setPercentage(e.target.value)}
-                            className="bg-[#1e1e1e] border border-[#3c3c3c] text-white py-2 px-4 rounded w-20 focus:outline-none focus:border-brand-500"
+                            validateFn={validatePercentage}
+                            min={1}
+                            max={100}
+                            required
+                            className="w-24"
                         />
                         <span className="text-gray-300">% of original size</span>
                     </div>
@@ -68,35 +108,45 @@ const ResizeImagesAction: React.FC<ResizeImagesActionProps> = ({ action, onDelet
                     <div className="space-y-3">
                         <div className="flex items-center space-x-2">
                             <span className="text-gray-300 w-16">Width:</span>
-                            <input
+                            <FormInput
                                 type="number"
-                                min="1"
+                                id={`width-${action.id}`}
+                                name="width"
                                 value={width}
                                 onChange={(e) => setWidth(e.target.value)}
-                                className="bg-[#1e1e1e] border border-[#3c3c3c] text-white py-2 px-4 rounded w-24 focus:outline-none focus:border-brand-500"
+                                validateFn={(val) => validateDimension(val, 'Width')}
+                                min={1}
+                                required
+                                className="w-24"
                             />
                             <span className="text-gray-300">px</span>
                         </div>
                         <div className="flex items-center space-x-2">
                             <span className="text-gray-300 w-16">Height:</span>
-                            <input
+                            <FormInput
                                 type="number"
-                                min="1"
+                                id={`height-${action.id}`}
+                                name="height"
                                 value={height}
                                 onChange={(e) => setHeight(e.target.value)}
-                                className="bg-[#1e1e1e] border border-[#3c3c3c] text-white py-2 px-4 rounded w-24 focus:outline-none focus:border-brand-500"
+                                validateFn={(val) => validateDimension(val, 'Height')}
+                                min={1}
+                                required
+                                className="w-24"
                             />
                             <span className="text-gray-300">px</span>
                         </div>
                         <div className="flex items-center">
                             <input
                                 type="checkbox"
-                                id="aspectRatio"
+                                id={`aspect-ratio-${action.id}`}
                                 checked={maintainAspectRatio}
                                 onChange={(e) => setMaintainAspectRatio(e.target.checked)}
                                 className="mr-2"
                             />
-                            <label htmlFor="aspectRatio" className="text-gray-300">Maintain aspect ratio</label>
+                            <label htmlFor={`aspect-ratio-${action.id}`} className="text-gray-300">
+                                Maintain aspect ratio
+                            </label>
                         </div>
                     </div>
                 )}
@@ -106,36 +156,35 @@ const ResizeImagesAction: React.FC<ResizeImagesActionProps> = ({ action, onDelet
             <span className="text-gray-300 w-32">
               {resizeOption === 'maxWidth' ? 'Maximum width:' : 'Maximum height:'}
             </span>
-                        <input
+                        <FormInput
                             type="number"
-                            min="1"
+                            id={`${resizeOption === 'maxWidth' ? 'max-width' : 'max-height'}-${action.id}`}
+                            name={resizeOption === 'maxWidth' ? 'width' : 'height'}
                             value={resizeOption === 'maxWidth' ? width : height}
                             onChange={(e) => resizeOption === 'maxWidth' ? setWidth(e.target.value) : setHeight(e.target.value)}
-                            className="bg-[#1e1e1e] border border-[#3c3c3c] text-white py-2 px-4 rounded w-24 focus:outline-none focus:border-brand-500"
+                            validateFn={(val) => validateDimension(val, resizeOption === 'maxWidth' ? 'Maximum width' : 'Maximum height')}
+                            min={1}
+                            required
+                            className="w-24"
                         />
                         <span className="text-gray-300">px</span>
                     </div>
                 )}
 
-                <div className="flex-grow">
-                    <div className="relative">
-                        <select
-                            value={outputFormat}
-                            onChange={(e) => setOutputFormat(e.target.value)}
-                            className="appearance-none bg-[#2d2d2d] border border-[#3c3c3c] text-white py-2 px-4 pr-8 rounded w-full focus:outline-none focus:bg-[#3c3c3c]"
-                        >
-                            <option value="original">Keep original format</option>
-                            <option value="jpg">Convert to JPG</option>
-                            <option value="png">Convert to PNG</option>
-                            <option value="webp">Convert to WebP</option>
-                        </select>
-                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </div>
-                    </div>
-                </div>
+                <FormInput
+                    type="select"
+                    id={`output-format-${action.id}`}
+                    name="outputFormat"
+                    value={outputFormat}
+                    onChange={(e) => setOutputFormat(e.target.value)}
+                    label="Output format"
+                    options={[
+                        { value: 'original', label: 'Keep original format' },
+                        { value: 'jpg', label: 'Convert to JPG' },
+                        { value: 'png', label: 'Convert to PNG' },
+                        { value: 'webp', label: 'Convert to WebP' }
+                    ]}
+                />
             </div>
         </div>
     );

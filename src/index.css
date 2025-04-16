@@ -10,18 +10,90 @@
 }
 
 :root {
-  --permitives-tokens-color-base-white: rgba(255, 255, 255, 1);
-  --permitives-tokens-color-brand-500: rgba(97, 114, 243, 1);
-  --permitives-tokens-color-gray-light-mode-300: rgba(208, 213, 221, 1);
-  --variable-collection-main-dark: rgba(201, 179, 255, 1);
-  --variable-collection-mogador-green: rgba(58, 77, 87, 1);
+  /* Common variables */
+  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+  'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+
+  /* Dark theme variables (default) */
+  --color-bg-primary: #282828;
+  --color-bg-secondary: #1e1e1e;
+  --color-bg-tertiary: #2d2d2d;
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #bfbfbf;
+  --color-text-tertiary: #8a8a8a;
+  --color-border: rgba(255, 255, 255, 0.1);
+  --color-accent: rgba(97, 114, 243, 1);
+  --color-accent-hover: rgba(79, 94, 213, 1);
+  --color-accent-light: rgba(97, 114, 243, 0.2);
+  --color-success: #10b981;
+  --color-error: #ef4444;
+  --color-warning: #f59e0b;
+}
+
+/* Light theme variables */
+.light-theme {
+  --color-bg-primary: #f8f9fa;
+  --color-bg-secondary: #ffffff;
+  --color-bg-tertiary: #edf2f7;
+  --color-text-primary: #1a202c;
+  --color-text-secondary: #4a5568;
+  --color-text-tertiary: #718096;
+  --color-border: rgba(0, 0, 0, 0.1);
+  --color-accent: rgba(67, 84, 213, 1);
+  --color-accent-hover: rgba(47, 64, 193, 1);
+  --color-accent-light: rgba(67, 84, 213, 0.1);
+  --color-success: #059669;
+  --color-error: #dc2626;
+  --color-warning: #d97706;
+}
+
+/* Apply theme variables to existing color classes */
+.bg-main-dark {
+  background-color: var(--color-bg-primary);
+}
+
+.text-white {
+  color: var(--color-text-primary);
+}
+
+.text-gray-300, .text-gray-400 {
+  color: var(--color-text-secondary);
+}
+
+.text-gray-500 {
+  color: var(--color-text-tertiary);
+}
+
+.bg-\[\#1e1e1e\] {
+  background-color: var(--color-bg-secondary);
+}
+
+.bg-\[\#2d2d2d\] {
+  background-color: var(--color-bg-tertiary);
+}
+
+.border-gray-700, .border-gray-800, .border-\[\#3c3c3c\] {
+  border-color: var(--color-border);
+}
+
+.text-brand-500, .bg-brand-500, .border-brand-500 {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+  background-color: var(--color-accent);
+}
+
+.hover\:bg-brand-500:hover {
+  background-color: var(--color-accent-hover);
+}
+
+.text-indigo-400, .border-indigo-500 {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
 }
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-  'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-  sans-serif;
+  font-family: var(--font-family);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   @apply bg-main-dark text-white;
@@ -35,16 +107,6 @@ code {
 .divider {
   width: 100%;
   height: 1px;
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: var(--color-border);
   margin: 1.5rem 0;
 }
-
-/* Add to index.css */
-.custom-select {
-  @apply appearance-none bg-[#2d2d2d] border border-[#3c3c3c] text-white py-2 px-4 pr-8 rounded focus:outline-none focus:ring-1 focus:ring-brand-500 focus:border-brand-500;
-}
-
-.select-arrow {
-  @apply pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400;
-}
-

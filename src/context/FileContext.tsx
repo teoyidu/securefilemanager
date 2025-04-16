@@ -13,6 +13,7 @@ type FileContextType = {
     updateFileStatus: (id: string, status: ProcessStatus, progress: number) => void;
     updateAllFileStatuses: (status: ProcessStatus, progress: number) => void;
     clearFiles: () => void;
+    reorderFiles: (startIndex: number, endIndex: number) => void;
 };
 
 // Create context with default values
