@@ -361,7 +361,7 @@ const App: React.FC = () => {
                 <div className="flex items-center justify-between mt-6">
                   <div className="flex space-x-4">
                     <button
-                        className="flex items-center text-brand-500 text-sm"
+                        className="flex items-center text-brand-500 text-sm bg-[#232324] border border-brand-500/30 px-4 py-2 rounded-lg hover:bg-brand-500/10 focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer transition font-medium shadow-sm"
                         onClick={saveActionSet}
                     >
                       <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -371,7 +371,7 @@ const App: React.FC = () => {
                     </button>
 
                     <button
-                        className="flex items-center text-brand-500 text-sm"
+                        className="flex items-center text-brand-500 text-sm bg-[#232324] border border-brand-500/30 px-4 py-2 rounded-lg hover:bg-brand-500/10 focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer transition font-medium shadow-sm"
                         onClick={loadActionSets}
                     >
                       <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -382,7 +382,7 @@ const App: React.FC = () => {
                   </div>
 
                   <button
-                      className="bg-brand-500 hover:bg-opacity-90 text-white py-2 px-6 rounded text-lg font-semibold shadow-md transition-all"
+                      className="bg-brand-500 hover:bg-brand-600 text-white py-2 px-6 rounded-lg text-lg font-semibold shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer"
                       onClick={processAndDownload}
                       disabled={appState.isProcessing}
                   >

@@ -201,7 +201,7 @@ const ActionPanel: React.FC<ActionPanelProps> = ({
         {/* Add action floating button */}
         <div className="absolute right-8 bottom-8">
           <button
-            className="bg-brand-500 hover:bg-brand-500/80 text-white rounded-full w-12 h-12 flex items-center justify-center shadow-lg text-3xl font-bold transition-all"
+            className="bg-brand-500 hover:bg-brand-500/80 text-white rounded-full w-12 h-12 flex items-center justify-center shadow-lg text-3xl font-bold transition-all focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer"
             onClick={() => setShowAddMenu(!showAddMenu)}
             aria-label="Add action"
           >
