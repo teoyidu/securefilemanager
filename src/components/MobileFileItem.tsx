@@ -110,25 +110,28 @@ const MobileFileItem: React.FC<MobileFileItemProps> = ({
                                 const value = e.target.value as ConversionOption;
                                 onConvertTo(file.id, value === 'None' ? null : value);
                             }}
-                            className="appearance-none bg-[#2d2d2d] border border-[#3c3c3c] text-white py-1 pl-3 pr-8 rounded leading-tight focus:outline-none focus:bg-[#3c3c3c] text-xs"
+                            className="appearance-none bg-[#2d2d2d] border border-[#3c3c3c] text-white py-2 px-4 pr-10 rounded-xl w-full focus:outline-none focus:bg-[#3c3c3c] shadow-sm transition text-sm"
                         >
                             <option value="None">Convert to...</option>
-                            <option value="PDF">PDF</option>
+                            <option value="pdf">PDF</option>
                             {file.format === 'image' && (
-                                <>
-                                    <option value="JPEG">JPEG</option>
-                                    <option value="PNG">PNG</option>
-                                </>
+                                <option value="webp">WebP</option>
                             )}
                             {file.format === 'docx' && (
-                                <option value="DOCX">DOCX</option>
+                                <>
+                                    <option value="txt">Text</option>
+                                    <option value="pdf">PDF</option>
+                                </>
                             )}
                             {file.format === 'xlsx' && (
-                                <option value="XLSX">XLSX</option>
+                                <>
+                                    <option value="csv">CSV</option>
+                                    <option value="json">JSON</option>
+                                </>
                             )}
                         </select>
-                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-400">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </div>

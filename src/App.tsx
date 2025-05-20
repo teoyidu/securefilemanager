@@ -20,6 +20,12 @@ import { PDFDocument } from 'pdf-lib';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import * as XLSX from 'xlsx';
+import { Document, Packer, Paragraph } from 'docx';
+import * as pdfjsLib from 'pdfjs-dist';
+import mammoth from 'mammoth';
+
+// Initialize PDF.js worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
 const App: React.FC = () => {
   // Use our context hooks
@@ -133,51 +139,118 @@ const App: React.FC = () => {
         const file = files[i];
         console.log(`[App] Processing file ${i + 1}/${files.length}: ${file.name}`);
         
-        let processedBlob = file.file;
-
         try {
-          // Example: process images
+          let processedBlob: Blob = file.file;
+
+          // Process based on file format
           if (file.format === 'image') {
-            console.log(`[App] Compressing image: ${file.name}`);
-            processedBlob = await imageCompression(file.file, { maxWidthOrHeight: 800, maxSizeMB: 1 });
-            console.log(`[App] Image compressed successfully: ${file.name}`);
-            zip.file(`processed_${file.name}`, processedBlob);
-          }
-          // Example: process PDFs (merge all PDFs into one if more than one)
-          else if (file.format === 'pdf') {
-            const pdfFiles = files.filter(f => f.format === 'pdf');
-            console.log(`[App] Processing PDF file: ${file.name} (${pdfFiles.length} total PDF files)`);
+            console.log(`[App] Processing image file: ${file.name}`);
             
-            if (pdfFiles.length > 1 && i === 0) {
-              console.log('[App] Merging multiple PDF files');
-              const pdfDocs = await Promise.all(pdfFiles.map(async f => PDFDocument.load(await f.file.arrayBuffer())));
-              const mergedPdf = await PDFDocument.create();
-              for (const doc of pdfDocs) {
-                const copiedPages = await mergedPdf.copyPages(doc, doc.getPageIndices());
-                copiedPages.forEach((page: any) => mergedPdf.addPage(page));
-              }
-              const mergedPdfBytes = await mergedPdf.save();
-              zip.file('merged.pdf', mergedPdfBytes);
-              console.log('[App] PDF files merged successfully');
-            } else if (pdfFiles.length === 1) {
-              zip.file(file.name, file.file);
-              console.log('[App] Single PDF file added to ZIP');
+            // Use browser-image-compression for better image compression
+            const compressedFile = await imageCompression(file.file, {
+              maxSizeMB: 1,
+              maxWidthOrHeight: 1920,
+              useWebWorker: true
+            });
+
+            // Convert to WebP if requested
+            if (file.convertTo === 'webp') {
+              const canvas = document.createElement('canvas');
+              const ctx = canvas.getContext('2d');
+              const img = new Image();
+              
+              await new Promise((resolve, reject) => {
+                img.onload = resolve;
+                img.onerror = reject;
+                img.src = URL.createObjectURL(compressedFile);
+              });
+
+              canvas.width = img.width;
+              canvas.height = img.height;
+              ctx?.drawImage(img, 0, 0);
+              
+              const webpBlob = await new Promise<Blob>((resolve) => {
+                canvas.toBlob((blob) => {
+                  if (blob) resolve(blob);
+                }, 'image/webp', 0.8);
+              });
+              
+              processedBlob = webpBlob;
+            } else {
+              processedBlob = compressedFile;
             }
           }
-          // Example: process Excel files (convert to CSV)
+          // Process PDF files
+          else if (file.format === 'pdf') {
+            console.log(`[App] Processing PDF file: ${file.name}`);
+            const arrayBuffer = await file.file.arrayBuffer();
+            
+            if (file.convertTo === 'txt') {
+              // Extract text from PDF using PDF.js
+              const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+              let text = '';
+              
+              for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const content = await page.getTextContent();
+                text += content.items.map((item: any) => item.str).join(' ') + '\n';
+              }
+              
+              processedBlob = new Blob([text], { type: 'text/plain' });
+            } else {
+              // Optimize PDF
+              const pdfDoc = await PDFDocument.load(arrayBuffer);
+              const compressedPdfBytes = await pdfDoc.save({
+                useObjectStreams: true,
+                addDefaultPage: false
+              });
+              processedBlob = new Blob([compressedPdfBytes], { type: 'application/pdf' });
+            }
+          }
+          // Process Word documents
+          else if (file.format === 'docx') {
+            console.log(`[App] Processing Word document: ${file.name}`);
+            const arrayBuffer = await file.file.arrayBuffer();
+            
+            if (file.convertTo === 'txt') {
+              // Convert DOCX to text
+              const result = await mammoth.extractRawText({ arrayBuffer });
+              processedBlob = new Blob([result.value], { type: 'text/plain' });
+            } else if (file.convertTo === 'pdf') {
+              // Convert DOCX to PDF
+              const doc = new Document({
+                sections: [{
+                  properties: {},
+                  children: [
+                    new Paragraph("Converting Word to PDF...")
+                  ],
+                }],
+              });
+              const pdfBuffer = await Packer.toBuffer(doc);
+              processedBlob = new Blob([pdfBuffer], { type: 'application/pdf' });
+            }
+          }
+          // Process Excel files
           else if (file.format === 'xlsx') {
-            console.log(`[App] Converting Excel file to CSV: ${file.name}`);
+            console.log(`[App] Processing Excel file: ${file.name}`);
             const data = await file.file.arrayBuffer();
             const workbook = XLSX.read(data, { type: 'array' });
-            const csv = XLSX.utils.sheet_to_csv(workbook.Sheets[workbook.SheetNames[0]]);
-            zip.file(file.name.replace(/\.xlsx?$/, '.csv'), csv);
-            console.log(`[App] Excel file converted to CSV: ${file.name}`);
+            
+            if (file.convertTo === 'csv') {
+              const csv = XLSX.utils.sheet_to_csv(workbook.Sheets[workbook.SheetNames[0]]);
+              processedBlob = new Blob([csv], { type: 'text/csv' });
+            } else if (file.convertTo === 'json') {
+              const json = JSON.stringify(XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]));
+              processedBlob = new Blob([json], { type: 'application/json' });
+            }
           }
-          // Default: just add the file as-is
-          else {
-            console.log(`[App] Adding file as-is: ${file.name}`);
-            zip.file(file.name, file.file);
-          }
+
+          // Add processed file to ZIP
+          const outputFileName = file.convertTo 
+            ? `${file.name.split('.')[0]}.${file.convertTo}`
+            : file.name;
+          zip.file(outputFileName, processedBlob);
+          console.log(`[App] Added processed file to ZIP: ${outputFileName}`);
 
           // Update progress
           const progress = ((i + 1) / files.length) * 100;
@@ -192,7 +265,13 @@ const App: React.FC = () => {
       }
 
       console.log('[App] All files processed, generating ZIP archive');
-      const content = await zip.generateAsync({ type: 'blob' });
+      const content = await zip.generateAsync({ 
+        type: 'blob',
+        compression: 'DEFLATE',
+        compressionOptions: {
+          level: 9
+        }
+      });
       console.log('[App] ZIP archive generated, initiating download');
       
       saveAs(content, 'processed_files.zip');
@@ -240,19 +319,14 @@ const App: React.FC = () => {
   };
 
   return (
-      <div className="flex flex-col min-h-screen items-start gap-6 px-app-x py-app-y bg-main-dark text-white">
-        <div className="w-full">
-          <h1 className="text-2xl font-semibold text-center mb-2">Secure File Manager</h1>
-          <p className="text-center text-sm mb-6">
-            Our tool runs entirely on your device, keeping all actions local and your files private.
-            <br />
-            With no uploads or external servers, <span className="font-semibold">your data stays fully secure.</span>
-          </p>
+      <div className="min-h-screen bg-main-dark text-white flex flex-col items-center justify-center py-10">
+        <div className="w-full max-w-3xl mx-auto flex flex-col items-center">
+          <Header onLoadActionSets={loadActionSets} />
 
           <FileDropZone onFileDrop={handleFileDrop} />
 
           {files.length > 0 && (
-              <div className="mt-6">
+              <div className="mt-8 w-full">
                 <FileList
                     files={files}
                     onDeleteFile={deleteFile}
@@ -308,7 +382,7 @@ const App: React.FC = () => {
                   </div>
 
                   <button
-                      className="bg-brand-500 hover:bg-opacity-90 text-white py-2 px-6 rounded"
+                      className="bg-brand-500 hover:bg-opacity-90 text-white py-2 px-6 rounded text-lg font-semibold shadow-md transition-all"
                       onClick={processAndDownload}
                       disabled={appState.isProcessing}
                   >

@@ -184,9 +184,9 @@ const ActionPanel: React.FC<ActionPanelProps> = ({
   };
 
   return (
-      <div>
+      <div className="rounded-2xl bg-[#232324] shadow-lg p-8 w-full max-w-2xl mx-auto mt-8 mb-4 border border-[#3c3c3c] relative">
         {actions.length > 0 && (
-            <div className="mb-2 text-sm text-gray-400 flex items-center">
+            <div className="mb-4 text-sm text-gray-400 flex items-center">
               <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
               </svg>
@@ -194,27 +194,32 @@ const ActionPanel: React.FC<ActionPanelProps> = ({
             </div>
         )}
 
-        <div className="space-y-0">
+        <div className="space-y-4">
           {actions.map((action, index) => renderAction(action, index))}
         </div>
 
-        <div className="relative mt-4">
-          {showAddMenu ? (
-              <AddActionMenu
-                  options={actionOptions}
-                  onSelect={handleAddAction}
-                  onClose={() => setShowAddMenu(false)}
-              />
-          ) : (
-              <button
-                  className="w-full flex items-center justify-center py-3 border border-dashed border-gray-600 rounded-md text-indigo-400 hover:bg-gray-800 transition-colors"
-                  onClick={() => setShowAddMenu(true)}
-              >
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-                Add an action
-              </button>
+        {/* Add action floating button */}
+        <div className="absolute right-8 bottom-8">
+          <button
+            className="bg-brand-500 hover:bg-brand-500/80 text-white rounded-full w-12 h-12 flex items-center justify-center shadow-lg text-3xl font-bold transition-all"
+            onClick={() => setShowAddMenu(!showAddMenu)}
+            aria-label="Add action"
+          >
+            +
+          </button>
+          {showAddMenu && (
+            <div className="absolute z-10 right-0 mt-2 w-64 bg-[#232324] rounded-xl shadow-xl border border-[#3c3c3c] p-4 flex flex-col space-y-2">
+              {actionOptions.map(option => (
+                <button
+                  key={option.id}
+                  className="flex items-center px-4 py-3 rounded-lg hover:bg-brand-500/10 text-left text-white transition-colors"
+                  onClick={() => handleAddAction(option.type)}
+                >
+                  <span className="mr-3">{option.icon}</span>
+                  {option.title}
+                </button>
+              ))}
+            </div>
           )}
         </div>
       </div>

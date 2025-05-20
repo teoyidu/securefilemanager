@@ -112,9 +112,9 @@ const FileList: React.FC<FileListProps> = ({
     };
 
     return (
-        <div className="rounded-md overflow-hidden">
+        <div className="rounded-2xl bg-[#232324] shadow-lg p-0 w-full max-w-2xl mx-auto overflow-hidden border border-[#3c3c3c]">
             {files.length > 0 && (
-                <div className="mb-2 text-sm text-gray-400 flex items-center">
+                <div className="mb-2 text-sm text-gray-400 flex items-center px-6 pt-6">
                     <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
                     </svg>
@@ -124,7 +124,7 @@ const FileList: React.FC<FileListProps> = ({
 
             {/* Mobile layout */}
             {isMobile ? (
-                <div>
+                <div className="px-4 pb-4">
                     {displayFiles.map((file) => (
                         <MobileFileItem
                             key={file.id}
@@ -138,7 +138,7 @@ const FileList: React.FC<FileListProps> = ({
             ) : (
                 /* Desktop layout */
                 <>
-                    <div className="grid grid-cols-12 text-sm text-gray-300 px-4 py-2">
+                    <div className="grid grid-cols-12 text-xs text-gray-400 px-6 pt-4 pb-2">
                         <div className="col-span-1"></div> {/* Empty column for drag handle */}
                         <div className="col-span-1">Format</div>
                         <div className="col-span-4">File name</div>
@@ -146,7 +146,7 @@ const FileList: React.FC<FileListProps> = ({
                             <div className="col-span-3">Progress</div>
                         )}
                         <div className="col-span-2 text-right">Size</div>
-                        <div className="col-span-1 text-center">Actions</div>
+                        <div className="col-span-1 text-center">Delete</div>
                     </div>
 
                     {displayFiles.map((file, index) => (
@@ -158,16 +158,16 @@ const FileList: React.FC<FileListProps> = ({
                             onDragEnter={handleDragEnter}
                             onDragEnd={handleDragEnd}
                             isDragging={draggedIndex === index}
-                            className="mb-1"
+                            className="mb-2"
                         >
                             <div
-                                className="grid grid-cols-12 items-center bg-[#1e1e1e] px-4 py-3 rounded-md"
+                                className="grid grid-cols-12 items-center bg-[#1e1e1e] px-6 py-4 rounded-xl mb-2 shadow-sm hover:bg-[#232324] transition-colors"
                             >
                                 <div className="col-span-1 flex items-center">
                                     {renderFileIcon(file.format)}
                                 </div>
 
-                                <div className="col-span-4 truncate pr-4">
+                                <div className="col-span-4 truncate pr-4 text-white font-medium">
                                     {file.name}
                                 </div>
 
@@ -176,7 +176,7 @@ const FileList: React.FC<FileListProps> = ({
                                         {file.status === ProcessStatus.InProgress && (
                                             <div className="w-full bg-[#2d2d2d] rounded-full h-2 overflow-hidden">
                                                 <div
-                                                    className="bg-brand-500 h-2 rounded-full"
+                                                    className="bg-brand-500 h-2 rounded-full transition-all duration-300"
                                                     style={{ width: `${file.progress}%` }}
                                                 ></div>
                                             </div>
@@ -197,65 +197,48 @@ const FileList: React.FC<FileListProps> = ({
                                     </div>
                                 )}
 
-                                <div className="col-span-2 text-right">
+                                <div className="col-span-2 text-right text-gray-300 font-medium">
                                     {formatSize(file.size)}
                                 </div>
-
-                                <div className="col-span-1 flex justify-center space-x-2">
-                                    {/* Preview button - only for supported formats */}
-                                    {['image', 'pdf'].includes(file.format) && (
-                                        <button
-                                            onClick={() => onPreviewFile(file)}
-                                            className="text-gray-400 hover:text-white transition-colors"
-                                            title="Preview file"
-                                        >
-                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                            </svg>
-                                        </button>
-                                    )}
-
-                                    {/* Delete button */}
-                                    <button
-                                        onClick={() => onDeleteFile(file.id)}
-                                        className="text-gray-400 hover:text-white transition-colors"
-                                        title="Delete file"
-                                    >
+                                <div className="col-span-1 flex justify-center">
+                                    <button onClick={() => onDeleteFile(file.id)} className="text-gray-400 hover:text-red-500 transition-colors">
                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                                         </svg>
                                     </button>
                                 </div>
 
-                                {/* Convert to dropdown - shown below other columns for better layout */}
-                                <div className="col-span-12 mt-2 flex justify-end">
-                                    <div className="relative">
+                                {/* Convert to dropdown - shown in the correct column */}
+                                <div className="col-span-1 flex justify-center">
+                                    <div className="relative w-full max-w-[120px]">
                                         <select
                                             value={file.convertTo || 'None'}
                                             onChange={(e) => {
                                                 const value = e.target.value as ConversionOption;
                                                 onConvertTo(file.id, value === 'None' ? null : value);
                                             }}
-                                            className="appearance-none bg-[#2d2d2d] border border-[#3c3c3c] text-white py-1 pl-3 pr-8 rounded leading-tight focus:outline-none focus:bg-[#3c3c3c]"
+                                            className="appearance-none bg-[#2d2d2d] border border-[#3c3c3c] text-white py-2 px-4 pr-10 rounded-xl w-full focus:outline-none focus:bg-[#3c3c3c] shadow-sm transition text-sm"
                                         >
                                             <option value="None">Convert to...</option>
-                                            <option value="PDF">PDF</option>
+                                            <option value="pdf">PDF</option>
                                             {file.format === 'image' && (
-                                                <>
-                                                    <option value="JPEG">JPEG</option>
-                                                    <option value="PNG">PNG</option>
-                                                </>
+                                                <option value="webp">WebP</option>
                                             )}
                                             {file.format === 'docx' && (
-                                                <option value="DOCX">DOCX</option>
+                                                <>
+                                                    <option value="txt">Text</option>
+                                                    <option value="pdf">PDF</option>
+                                                </>
                                             )}
                                             {file.format === 'xlsx' && (
-                                                <option value="XLSX">XLSX</option>
+                                                <>
+                                                    <option value="csv">CSV</option>
+                                                    <option value="json">JSON</option>
+                                                </>
                                             )}
                                         </select>
-                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
-                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-400">
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                                             </svg>
                                         </div>
