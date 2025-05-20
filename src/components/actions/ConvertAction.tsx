@@ -1,6 +1,7 @@
 // src/components/actions/ConvertAction.tsx
 import React, { useState } from 'react';
 import { ActionType } from '../../types';
+import StyledDropdown from '../StyledDropdown';
 
 interface ConvertActionProps {
   action: ActionType;
@@ -12,60 +13,42 @@ const ConvertAction: React.FC<ConvertActionProps> = ({ action, onDelete }) => {
   const [selectedFormat, setSelectedFormat] = useState<string>('PDF');
 
   return (
-      <div className="mt-6">
-        <div className="flex justify-between mb-2">
-          <div className="flex items-center text-sm text-white">
-            <span>Convert file to other format</span>
-            <button
-                onClick={onDelete}
-                className="ml-2 text-xs text-gray-400 hover:text-gray-300"
-            >
-              Delete this action
-            </button>
-          </div>
+      <div className="mt-6 bg-[#1e1e1e] border border-[#3c3c3c] rounded-md p-4">
+        <div className="flex justify-between mb-4">
+          <div className="text-sm font-medium text-white">Convert file to other format</div>
+          <button
+              onClick={onDelete}
+              className="text-xs text-gray-400 hover:text-gray-300"
+          >
+            Delete this action
+          </button>
         </div>
 
         <div className="flex items-center space-x-4">
-          <div className="flex-grow">
-            <div className="relative">
-              <select
-                  value={conversionType}
-                  onChange={(e) => setConversionType(e.target.value)}
-                  className="appearance-none bg-[#2d2d2d] border border-[#3c3c3c] text-white py-2 px-4 pr-8 rounded w-full focus:outline-none focus:bg-[#3c3c3c]"
-              >
-                <option value="separately">Convert files separately</option>
-                <option value="all">Convert all files to same format</option>
-                <option value="single">Combine all into single PDF file</option>
-                <option value="pdf-separate">Create separate PDF files</option>
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-            </div>
-          </div>
+          <StyledDropdown
+              value={conversionType}
+              onChange={(e) => setConversionType(e.target.value)}
+              options={[
+                { value: 'separately', label: 'Convert files separately' },
+                { value: 'all', label: 'Convert all files to same format' },
+                { value: 'single', label: 'Combine all into single PDF file' },
+                { value: 'pdf-separate', label: 'Create separate PDF files' }
+              ]}
+              className="flex-grow"
+          />
 
           {conversionType !== 'single' && conversionType !== 'pdf-separate' && (
-              <div className="w-32">
-                <div className="relative">
-                  <select
-                      value={selectedFormat}
-                      onChange={(e) => setSelectedFormat(e.target.value)}
-                      className="appearance-none bg-[#2d2d2d] border border-[#3c3c3c] text-white py-2 px-4 pr-8 rounded w-full focus:outline-none focus:bg-[#3c3c3c]"
-                  >
-                    <option value="PDF">PDF</option>
-                    <option value="DOCX">DOCX</option>
-                    <option value="PNG">PNG</option>
-                    <option value="JPEG">JPEG</option>
-                  </select>
-                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
+              <StyledDropdown
+                  value={selectedFormat}
+                  onChange={(e) => setSelectedFormat(e.target.value)}
+                  options={[
+                    { value: 'PDF', label: 'PDF' },
+                    { value: 'DOCX', label: 'DOCX' },
+                    { value: 'PNG', label: 'PNG' },
+                    { value: 'JPEG', label: 'JPEG' }
+                  ]}
+                  className="w-32"
+              />
           )}
         </div>
       </div>

@@ -4,13 +4,22 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { FileProvider } from './context/FileContext';
+import { AppProvider } from './context/AppContext';
+import { ActionProvider } from './context/ActionContext';
 
 const root = ReactDOM.createRoot(
     document.getElementById('root') as HTMLElement
 );
 root.render(
     <React.StrictMode>
-        <App />
+        <FileProvider>
+            <AppProvider>
+                <ActionProvider>
+                    <App />
+                </ActionProvider>
+            </AppProvider>
+        </FileProvider>
     </React.StrictMode>
 );
 

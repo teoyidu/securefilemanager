@@ -25,21 +25,24 @@ const AddActionMenu: React.FC<AddActionMenuProps> = ({ options, onSelect, onClos
   }, [onClose]);
 
   return (
-      <div ref={menuRef} className="absolute z-10 bg-[#1e1e1e] border border-[#3c3c3c] rounded-md shadow-lg w-full">
-        <div className="p-4 text-white">
-          <h3 className="text-sm font-medium mb-2">Add an action</h3>
+      <div
+          ref={menuRef}
+          className="absolute z-10 top-full mt-2 bg-[#2d2d2d] border border-[#3c3c3c] rounded-md shadow-lg w-full overflow-hidden"
+      >
+        <div className="p-4">
+          <h3 className="text-sm font-medium mb-3 text-gray-300">Add an action</h3>
 
           <div className="space-y-2">
             {options.map((option) => (
                 <button
                     key={option.id}
-                    className="w-full flex items-center py-3 px-4 rounded-md text-left hover:bg-[#2d2d2d] transition-colors"
+                    className="w-full flex items-center py-3 px-4 rounded-md text-left hover:bg-[#3c3c3c] transition-colors"
                     onClick={() => onSelect(option.type)}
                 >
                   <div className="flex items-center justify-center w-6 h-6 bg-brand-500 rounded-md mr-3 text-white">
                     {option.icon}
                   </div>
-                  <span className="text-sm">{option.title}</span>
+                  <span className="text-sm text-white">{option.title}</span>
                 </button>
             ))}
           </div>

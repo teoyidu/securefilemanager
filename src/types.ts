@@ -7,14 +7,7 @@ export enum FileFormat {
   OTHER = 'other'
 }
 
-export enum ConversionOption {
-  PDF = 'PDF',
-  JPEG = 'JPEG',
-  PNG = 'PNG',
-  DOCX = 'DOCX',
-  XLSX = 'XLSX',
-  NONE = 'None'
-}
+export type ConversionOption = 'webp' | 'txt' | 'pdf' | 'csv' | 'json' | 'None' | null;
 
 export enum ProcessStatus {
   NotStarted = 'not-started',
@@ -53,6 +46,12 @@ export interface ActionType {
     prefix?: string;
     suffix?: string;
     outputName?: string;
+    resizeOption?: string;
+    percentage?: string;
+    width?: string;
+    height?: string;
+    maintainAspectRatio?: string;
+    outputFormat?: string;
   };
 }
 
