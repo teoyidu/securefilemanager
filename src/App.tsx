@@ -11,9 +11,15 @@ import SavedActionSets from './components/SavedActionSets';
 import ResponsiveLayout from './components/ResponsiveLayout';
 import Header from './components/Header';
 import { useApp, useFiles, useActions } from './context';
-import { fileService } from './services/api';
 import { storageService } from './services/localStorage';
-import { ActionOptionType } from './types';
+import { ActionOptionType, ProcessStatus } from './types';
+
+// Add imports for client-side processing
+import imageCompression from 'browser-image-compression';
+import { PDFDocument } from 'pdf-lib';
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
+import * as XLSX from 'xlsx';
 
 const App: React.FC = () => {
   // Use our context hooks
@@ -64,7 +70,34 @@ const App: React.FC = () => {
 
   // Handle file drop
   const handleFileDrop = (acceptedFiles: File[]) => {
-    addFiles(acceptedFiles);
+    console.log(`[App] File drop event received with ${acceptedFiles.length} files`);
+    
+    try {
+      // Validate files
+      acceptedFiles.forEach(file => {
+        console.log(`[App] Validating file: ${file.name} (${(file.size / 1024).toFixed(2)} KB)`);
+        
+        // Check file size (e.g., max 100MB)
+        if (file.size > 100 * 1024 * 1024) {
+          throw new Error(`File ${file.name} is too large. Maximum size is 100MB.`);
+        }
+        
+        // Check file type
+        const extension = file.name.split('.').pop()?.toLowerCase();
+        const allowedExtensions = ['docx', 'doc', 'pdf', 'xls', 'xlsx', 'png', 'jpg', 'jpeg', 'gif'];
+        
+        if (!extension || !allowedExtensions.includes(extension)) {
+          throw new Error(`File ${file.name} has an unsupported format. Allowed formats: ${allowedExtensions.join(', ')}`);
+        }
+      });
+
+      console.log('[App] All files validated successfully');
+      addFiles(acceptedFiles);
+      console.log('[App] Files added to context successfully');
+    } catch (error) {
+      console.error('[App] Error handling file drop:', error);
+      alert(error instanceof Error ? error.message : 'An error occurred while processing the files');
+    }
   };
 
   // Handle file preview
@@ -77,90 +110,107 @@ const App: React.FC = () => {
     setPreviewFile(null);
   };
 
-  // Process and download files
+  // Process and download files (client-side only)
   const processAndDownload = async () => {
+    console.log('[App] Starting file processing and download');
+    
     if (files.length === 0) {
+      console.warn('[App] No files to process');
       alert('Please add files to process');
       return;
     }
 
     try {
-      // Start processing
-      startProcessing('Uploading files...');
+      startProcessing('Processing files...');
       setProcessingStartTime(Date.now());
       updateAllFileStatuses(ProcessStatus.InProgress, 0);
+      console.log(`[App] Processing ${files.length} files`);
 
-      // Upload files
-      const { uploadId } = await fileService.uploadFiles(files);
+      const zip = new JSZip();
+      console.log('[App] Created new ZIP archive');
 
-      // Update status
-      setProcessingState('processing', 'Processing files...');
-      setProcessingProgress(10);
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        console.log(`[App] Processing file ${i + 1}/${files.length}: ${file.name}`);
+        
+        let processedBlob = file.file;
 
-      // Start processing with actions
-      const { processId } = await fileService.processFiles(uploadId, actions);
-
-      // Poll for status updates
-      const statusCheckInterval = setInterval(async () => {
         try {
-          const statusResponse = await fileService.checkStatus(processId);
-
-          // Update overall progress
-          setProcessingProgress(statusResponse.progress);
-
-          // Update each file's progress
-          statusResponse.fileStatuses.forEach(fileStatus => {
-            updateFileStatus(fileStatus.fileId, fileStatus.status, fileStatus.progress);
-          });
-
-          // If all processing is done, stop polling
-          if (statusResponse.status === 'completed' || statusResponse.status === 'failed') {
-            clearInterval(statusCheckInterval);
-
-            setProcessingSuccess(statusResponse.status === 'completed');
-            if (statusResponse.status === 'failed') {
-              setProcessingError('One or more files failed to process.');
-            }
-
-            // Calculate final processing time
-            const finalTime = (Date.now() - (processingStartTime || Date.now())) / 1000;
-            setProcessingTime(finalTime);
-
-            // Complete processing and show summary
-            finishProcessing(statusResponse.status === 'completed');
-            setShowSummary(true);
+          // Example: process images
+          if (file.format === 'image') {
+            console.log(`[App] Compressing image: ${file.name}`);
+            processedBlob = await imageCompression(file.file, { maxWidthOrHeight: 800, maxSizeMB: 1 });
+            console.log(`[App] Image compressed successfully: ${file.name}`);
+            zip.file(`processed_${file.name}`, processedBlob);
           }
-        } catch (error) {
-          console.error('Error checking status:', error);
-          clearInterval(statusCheckInterval);
+          // Example: process PDFs (merge all PDFs into one if more than one)
+          else if (file.format === 'pdf') {
+            const pdfFiles = files.filter(f => f.format === 'pdf');
+            console.log(`[App] Processing PDF file: ${file.name} (${pdfFiles.length} total PDF files)`);
+            
+            if (pdfFiles.length > 1 && i === 0) {
+              console.log('[App] Merging multiple PDF files');
+              const pdfDocs = await Promise.all(pdfFiles.map(async f => PDFDocument.load(await f.file.arrayBuffer())));
+              const mergedPdf = await PDFDocument.create();
+              for (const doc of pdfDocs) {
+                const copiedPages = await mergedPdf.copyPages(doc, doc.getPageIndices());
+                copiedPages.forEach((page: any) => mergedPdf.addPage(page));
+              }
+              const mergedPdfBytes = await mergedPdf.save();
+              zip.file('merged.pdf', mergedPdfBytes);
+              console.log('[App] PDF files merged successfully');
+            } else if (pdfFiles.length === 1) {
+              zip.file(file.name, file.file);
+              console.log('[App] Single PDF file added to ZIP');
+            }
+          }
+          // Example: process Excel files (convert to CSV)
+          else if (file.format === 'xlsx') {
+            console.log(`[App] Converting Excel file to CSV: ${file.name}`);
+            const data = await file.file.arrayBuffer();
+            const workbook = XLSX.read(data, { type: 'array' });
+            const csv = XLSX.utils.sheet_to_csv(workbook.Sheets[workbook.SheetNames[0]]);
+            zip.file(file.name.replace(/\.xlsx?$/, '.csv'), csv);
+            console.log(`[App] Excel file converted to CSV: ${file.name}`);
+          }
+          // Default: just add the file as-is
+          else {
+            console.log(`[App] Adding file as-is: ${file.name}`);
+            zip.file(file.name, file.file);
+          }
 
-          finishProcessing(false);
-          setProcessingSuccess(false);
-          setProcessingError('An error occurred while checking processing status.');
-          setShowSummary(true);
+          // Update progress
+          const progress = ((i + 1) / files.length) * 100;
+          updateFileStatus(file.id, ProcessStatus.InProgress, progress);
+          console.log(`[App] Updated progress for ${file.name}: ${progress.toFixed(2)}%`);
+
+        } catch (error) {
+          console.error(`[App] Error processing file ${file.name}:`, error);
+          updateFileStatus(file.id, ProcessStatus.NotStarted, 0);
+          throw error;
         }
-      }, 1000); // Check every second
+      }
+
+      console.log('[App] All files processed, generating ZIP archive');
+      const content = await zip.generateAsync({ type: 'blob' });
+      console.log('[App] ZIP archive generated, initiating download');
+      
+      saveAs(content, 'processed_files.zip');
+      console.log('[App] Download initiated');
+
+      finishProcessing(true);
+      console.log('[App] Processing completed successfully');
 
     } catch (error) {
-      console.error('Processing error:', error);
-
+      console.error('[App] Error during file processing:', error);
+      setProcessingError(error instanceof Error ? error.message : 'An error occurred during processing');
       finishProcessing(false);
-      setProcessingSuccess(false);
-      setProcessingError('An error occurred during file processing. Please try again.');
-      setShowSummary(true);
     }
   };
 
-  // Handle download after processing
+  // Handle download after processing (not needed, handled above)
   const handleDownload = async () => {
-    try {
-      // This would need to be implemented with your actual backend integration
-      alert('Download would start here in a real application.');
-      setShowSummary(false);
-    } catch (error) {
-      console.error('Download error:', error);
-      alert('Error downloading files. Please try again.');
-    }
+    setShowSummary(false);
   };
 
   // Save action set

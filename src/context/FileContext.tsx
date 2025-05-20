@@ -27,6 +27,7 @@ const FileContext = createContext<FileContextType>({
     updateFileStatus: () => {},
     updateAllFileStatuses: () => {},
     clearFiles: () => {},
+    reorderFiles: () => {},
 });
 
 // Define action types for reducer
@@ -98,7 +99,11 @@ export const FileProvider: React.FC<{children: React.ReactNode}> = ({ children }
 
     // Add new files
     const addFiles = (newFiles: File[]) => {
+        console.log(`[FileContext] Starting to add ${newFiles.length} files`);
+        
         const fileObjects = newFiles.map((file) => {
+            console.log(`[FileContext] Processing file: ${file.name} (${(file.size / 1024).toFixed(2)} KB)`);
+            
             // Determine file format based on extension
             const extension = file.name.split('.').pop()?.toLowerCase() || '';
             let format = '';
@@ -113,9 +118,12 @@ export const FileProvider: React.FC<{children: React.ReactNode}> = ({ children }
                 format = 'image';
             } else {
                 format = 'other';
+                console.warn(`[FileContext] Unsupported file format: ${extension} for file: ${file.name}`);
             }
 
-            return {
+            console.log(`[FileContext] Detected format: ${format} for file: ${file.name}`);
+
+            const fileObject = {
                 id: `${file.name}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
                 name: file.name,
                 size: file.size,
@@ -125,34 +133,52 @@ export const FileProvider: React.FC<{children: React.ReactNode}> = ({ children }
                 status: ProcessStatus.NotStarted,
                 progress: 0
             };
+
+            console.log(`[FileContext] Created file object:`, fileObject);
+            return fileObject;
         });
 
+        console.log(`[FileContext] Dispatching ADD_FILES action with ${fileObjects.length} files`);
         dispatch({ type: 'ADD_FILES', payload: fileObjects });
     };
 
     // Delete a file
     const deleteFile = (id: string) => {
+        console.log(`[FileContext] Deleting file with ID: ${id}`);
         dispatch({ type: 'DELETE_FILE', payload: id });
     };
 
-    // Set conversion option for a file
+    // Set file conversion
     const setFileConversion = (id: string, option: ConversionOption | null) => {
+        console.log(`[FileContext] Setting conversion for file ${id} to: ${option || 'None'}`);
         dispatch({ type: 'SET_CONVERSION', payload: { id, option } });
     };
 
-    // Update status for a specific file
+    // Update file status
     const updateFileStatus = (id: string, status: ProcessStatus, progress: number) => {
+        console.log(`[FileContext] Updating status for file ${id}: ${status} (${progress}%)`);
         dispatch({ type: 'UPDATE_STATUS', payload: { id, status, progress } });
     };
 
-    // Update status for all files
+    // Update all file statuses
     const updateAllFileStatuses = (status: ProcessStatus, progress: number) => {
+        console.log(`[FileContext] Updating all files to status: ${status} (${progress}%)`);
         dispatch({ type: 'UPDATE_ALL_STATUSES', payload: { status, progress } });
     };
 
     // Clear all files
     const clearFiles = () => {
+        console.log('[FileContext] Clearing all files');
         dispatch({ type: 'CLEAR_FILES' });
+    };
+
+    // Reorder files
+    const reorderFiles = (startIndex: number, endIndex: number) => {
+        console.log(`[FileContext] Reordering files from index ${startIndex} to ${endIndex}`);
+        const result = Array.from(files);
+        const [removed] = result.splice(startIndex, 1);
+        result.splice(endIndex, 0, removed);
+        dispatch({ type: 'ADD_FILES', payload: result });
     };
 
     return (
@@ -166,7 +192,8 @@ export const FileProvider: React.FC<{children: React.ReactNode}> = ({ children }
                 setFileConversion,
                 updateFileStatus,
                 updateAllFileStatuses,
-                clearFiles
+                clearFiles,
+                reorderFiles
             }}
         >
             {children}

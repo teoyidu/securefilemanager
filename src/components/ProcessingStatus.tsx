@@ -3,6 +3,8 @@ import React from 'react';
 import { useApp, useFiles } from '../context';
 import { ProcessStatus } from '../types';
 
+type ProcessingState = 'uploading' | 'processing' | 'completed' | 'failed';
+
 const ProcessingStatus: React.FC = () => {
     const { appState } = useApp();
     const { files, totalSize, processedFiles } = useFiles();
@@ -23,7 +25,8 @@ const ProcessingStatus: React.FC = () => {
 
     // Get status icon
     const getStatusIcon = () => {
-        switch (appState.processingState) {
+        const state: ProcessingState = appState.processingState;
+        switch (state) {
             case 'uploading':
                 return (
                     <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -46,12 +49,6 @@ const ProcessingStatus: React.FC = () => {
                 return (
                     <svg className="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                );
-            default:
-                return (
-                    <svg className="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                 );
         }
@@ -108,10 +105,13 @@ const ProcessingStatus: React.FC = () => {
                         <div>
                             <div className="text-xs text-gray-400 mb-1">Processing details</div>
                             <div className="text-sm text-white">
-                                {appState.processingState === 'uploading' ? 'Uploading files...' :
-                                    appState.processingState === 'processing' ? `Processing ${statusCounts.inProgress} files simultaneously...` :
-                                        appState.processingState === 'completed' ? 'All files processed successfully' :
-                                            'Processing failed'}
+                                {(() => {
+                                    const state = appState.processingState as ProcessingState;
+                                    if (state === 'uploading') return 'Uploading files...';
+                                    if (state === 'processing') return `Processing ${statusCounts.inProgress} files simultaneously...`;
+                                    if (state === 'completed') return 'All files processed successfully';
+                                    return 'Processing failed';
+                                })()}
                             </div>
                         </div>
                     </div>

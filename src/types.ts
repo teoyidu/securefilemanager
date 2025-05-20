@@ -53,6 +53,12 @@ export interface ActionType {
     prefix?: string;
     suffix?: string;
     outputName?: string;
+    resizeOption?: string;
+    percentage?: string;
+    width?: string;
+    height?: string;
+    maintainAspectRatio?: string;
+    outputFormat?: string;
   };
 }
 
