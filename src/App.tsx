@@ -13,6 +13,7 @@ import Header from './components/Header';
 import { useApp, useFiles, useActions } from './context';
 import { storageService } from './services/localStorage';
 import { ActionOptionType, ProcessStatus } from './types';
+import styles from './App.module.css';
 
 // Add imports for client-side processing
 import imageCompression from 'browser-image-compression';
@@ -230,112 +231,111 @@ const App: React.FC = () => {
   };
 
   return (
-      <div className="min-h-screen bg-main-dark text-white flex flex-col items-center justify-center py-10">
-        <div className="w-full max-w-3xl mx-auto flex flex-col items-center">
-          <Header onLoadActionSets={loadActionSets} />
+    <div className={styles.appBg}>
+      <div className={styles.centeredContainer}>
+        <Header onLoadActionSets={loadActionSets} />
+        <FileDropZone onFileDrop={handleFileDrop} />
 
-          <FileDropZone onFileDrop={handleFileDrop} />
-
-          {files.length > 0 && (
-              <div className="mt-8 w-full">
-                <FileList
-                    files={files}
-                    onDeleteFile={deleteFile}
-                    onConvertTo={setFileConversion}
-                    onPreviewFile={handlePreviewFile}
-                    showLess={appState.showLess}
-                />
-
-                <div className="flex justify-between items-center text-xs text-gray-300 mt-2 mb-6">
-                  <div>Total {files.length} files • Approximately {(totalSize / (1024 * 1024)).toFixed(2)} MB</div>
-                  <button
-                      className="flex items-center text-gray-300 hover:text-white"
-                      onClick={toggleShowLess}
-                  >
-                    {appState.showLess ? 'SHOW ALL' : 'SHOW LESS'}
-                    <svg className={`ml-1 w-4 h-4 transform ${appState.showLess ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 15l7-7 7 7" />
-                    </svg>
-                  </button>
-                </div>
-
-                <div className="divider"></div>
-
-                <ActionPanel
-                    actions={actions}
-                    onAddAction={(type) => addAction(type as ActionOptionType)}
-                    onDeleteAction={deleteAction}
-                />
-
-                <div className="divider"></div>
-
-                <div className="flex items-center justify-between mt-6">
-                  <div className="flex space-x-4">
-                    <button
-                        className="flex items-center text-brand-500 text-sm bg-[#232324] border border-brand-500/30 px-4 py-2 rounded-lg hover:bg-brand-500/10 focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer transition font-medium shadow-sm"
-                        onClick={saveActionSet}
-                    >
-                      <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-                      </svg>
-                      Save this action set
-                    </button>
-
-                    <button
-                        className="flex items-center text-brand-500 text-sm bg-[#232324] border border-brand-500/30 px-4 py-2 rounded-lg hover:bg-brand-500/10 focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer transition font-medium shadow-sm"
-                        onClick={loadActionSets}
-                    >
-                      <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                      </svg>
-                      Load saved actions
-                    </button>
-                  </div>
-
-                  <button
-                      className="bg-brand-500 hover:bg-brand-600 text-white py-2 px-6 rounded-lg text-lg font-semibold shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer"
-                      onClick={processAndDownload}
-                      disabled={appState.isProcessing}
-                  >
-                    {appState.isProcessing ? 'Processing...' : 'Process & Download'}
-                  </button>
-                </div>
-
-                {processedFiles > 0 && !appState.isProcessing && (
-                    <div className="text-xs text-gray-300 mt-2 text-right">
-                      {processedFiles} of {files.length} files processed • Approximately {(totalSize / (1024 * 1024)).toFixed(2)} MB
-                    </div>
-                )}
-              </div>
-          )}
-
-          {/* File Preview Modal */}
-          {appState.previewFile && (
-              <FilePreview file={appState.previewFile} onClose={closePreview} />
-          )}
-
-          {/* Processing Status */}
-          <ProcessingStatus />
-
-          {/* Processing Summary Modal */}
-          {showSummary && (
-              <ProcessingSummary
-                  isOpen={showSummary}
-                  onClose={() => setShowSummary(false)}
-                  onDownload={handleDownload}
-                  processingTime={processingTime}
-                  success={processingSuccess}
-                  error={processingError}
+        {files.length > 0 && (
+            <div className="mt-8 w-full">
+              <FileList
+                  files={files}
+                  onDeleteFile={deleteFile}
+                  onConvertTo={setFileConversion}
+                  onPreviewFile={handlePreviewFile}
+                  showLess={appState.showLess}
               />
-          )}
 
-          {/* Saved Action Sets Modal */}
-          <SavedActionSets
-              isOpen={showActionSets}
-              onClose={() => setShowActionSets(false)}
-          />
-        </div>
+              <div className="flex justify-between items-center text-xs text-gray-300 mt-2 mb-6">
+                <div>Total {files.length} files • Approximately {(totalSize / (1024 * 1024)).toFixed(2)} MB</div>
+                <button
+                    className="flex items-center text-gray-300 hover:text-white"
+                    onClick={toggleShowLess}
+                >
+                  {appState.showLess ? 'SHOW ALL' : 'SHOW LESS'}
+                  <svg className={`ml-1 w-4 h-4 transform ${appState.showLess ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 15l7-7 7 7" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="divider"></div>
+
+              <ActionPanel
+                  actions={actions}
+                  onAddAction={(type) => addAction(type as ActionOptionType)}
+                  onDeleteAction={deleteAction}
+              />
+
+              <div className="divider"></div>
+
+              <div className="flex items-center justify-between mt-6">
+                <div className="flex space-x-4">
+                  <button
+                      className="flex items-center text-brand-500 text-sm bg-[#232324] border border-brand-500/30 px-4 py-2 rounded-lg hover:bg-brand-500/10 focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer transition font-medium shadow-sm"
+                      onClick={saveActionSet}
+                  >
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                    </svg>
+                    Save this action set
+                  </button>
+
+                  <button
+                      className="flex items-center text-brand-500 text-sm bg-[#232324] border border-brand-500/30 px-4 py-2 rounded-lg hover:bg-brand-500/10 focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer transition font-medium shadow-sm"
+                      onClick={loadActionSets}
+                  >
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                    Load saved actions
+                  </button>
+                </div>
+
+                <button
+                    className="bg-brand-500 hover:bg-brand-600 text-white py-2 px-6 rounded-lg text-lg font-semibold shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer"
+                    onClick={processAndDownload}
+                    disabled={appState.isProcessing}
+                >
+                  {appState.isProcessing ? 'Processing...' : 'Process & Download'}
+                </button>
+              </div>
+
+              {processedFiles > 0 && !appState.isProcessing && (
+                  <div className="text-xs text-gray-300 mt-2 text-right">
+                    {processedFiles} of {files.length} files processed • Approximately {(totalSize / (1024 * 1024)).toFixed(2)} MB
+                  </div>
+              )}
+            </div>
+        )}
+
+        {/* File Preview Modal */}
+        {appState.previewFile && (
+            <FilePreview file={appState.previewFile} onClose={closePreview} />
+        )}
+
+        {/* Processing Status */}
+        <ProcessingStatus />
+
+        {/* Processing Summary Modal */}
+        {showSummary && (
+            <ProcessingSummary
+                isOpen={showSummary}
+                onClose={() => setShowSummary(false)}
+                onDownload={handleDownload}
+                processingTime={processingTime}
+                success={processingSuccess}
+                error={processingError}
+            />
+        )}
+
+        {/* Saved Action Sets Modal */}
+        <SavedActionSets
+            isOpen={showActionSets}
+            onClose={() => setShowActionSets(false)}
+        />
       </div>
+    </div>
   );
 };
 

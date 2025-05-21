@@ -1,6 +1,7 @@
 // src/components/actions/CombineAction.tsx
 import React, { useState } from 'react';
 import { ActionType } from '../../types';
+import StyledDropdown from '../StyledDropdown';
 
 interface CombineActionProps {
   action: ActionType;
@@ -11,6 +12,24 @@ const CombineAction: React.FC<CombineActionProps> = ({ action, onDelete }) => {
   const [combineType, setCombineType] = useState<string>('same-format');
   const [selectedFormat, setSelectedFormat] = useState<string>('XLS');
   const [outputName, setOutputName] = useState<string>('Project-Budget');
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
+
+  const formatOptions = [
+    { value: 'PDF', label: 'PDF' },
+    { value: 'XLS', label: 'XLS' },
+    { value: 'DOCX', label: 'DOCX' },
+    { value: 'JPEG', label: 'JPEG' },
+  ];
+
+  const combineTypeOptions = [
+    { value: 'same-format', label: 'Combine same format files' },
+    { value: 'pdf', label: 'Create a single PDF file' },
+    { value: 'merge-excel', label: 'Merge Excel workbooks' }
+  ];
+
+  const handleFormatChange = (value: string) => {
+    setSelectedFormat(value);
+  };
 
   return (
       <div className="mt-6">
@@ -29,50 +48,23 @@ const CombineAction: React.FC<CombineActionProps> = ({ action, onDelete }) => {
         <div className="flex items-center space-x-4 mb-3">
           <div className="flex-grow">
             <div className="relative">
-              <select
-                  value={combineType}
-                  onChange={(e) => setCombineType(e.target.value)}
-                  className="appearance-none bg-[#2d2d2d] border border-[#3c3c3c] text-white py-2 px-4 pr-10 rounded-xl w-full focus:outline-none focus:bg-[#3c3c3c] shadow-sm transition text-sm"
-              >
-                <option value="same-format">Combine same format files</option>
-                <option value="pdf">Create a single PDF file</option>
-                <option value="merge-excel">Merge Excel workbooks</option>
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-400">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
+              <StyledDropdown
+                value={combineType}
+                onChange={(e) => setCombineType(e.target.value)}
+                options={combineTypeOptions}
+                disabled={isProcessing}
+              />
             </div>
           </div>
 
           <div className="w-32">
             <div className="relative">
-              <select
-                  value={selectedFormat}
-                  onChange={(e) => setSelectedFormat(e.target.value)}
-                  className="appearance-none bg-[#2d2d2d] border border-[#3c3c3c] text-white py-2 px-4 pr-10 rounded-xl w-full focus:outline-none focus:bg-[#3c3c3c] shadow-sm transition text-sm"
-              >
-                {combineType === 'same-format' && (
-                    <>
-                      <option value="PDF">PDF</option>
-                      <option value="XLS">XLS</option>
-                      <option value="DOCX">DOCX</option>
-                      <option value="JPEG">JPEG</option>
-                    </>
-                )}
-                {combineType === 'pdf' && (
-                    <option value="PDF">PDF</option>
-                )}
-                {combineType === 'merge-excel' && (
-                    <option value="XLS">XLS</option>
-                )}
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-400">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
+              <StyledDropdown
+                value={selectedFormat}
+                onChange={(e) => setSelectedFormat(e.target.value)}
+                options={formatOptions}
+                disabled={isProcessing}
+              />
             </div>
           </div>
         </div>

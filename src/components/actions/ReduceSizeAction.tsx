@@ -1,6 +1,7 @@
 // src/components/actions/ReduceSizeAction.tsx
 import React, { useState } from 'react';
 import { ActionType } from '../../types';
+import StyledDropdown from '../StyledDropdown';
 
 interface ReduceSizeActionProps {
   action: ActionType;
@@ -10,6 +11,27 @@ interface ReduceSizeActionProps {
 const ReduceSizeAction: React.FC<ReduceSizeActionProps> = ({ action, onDelete }) => {
   const [sizeOption, setSizeOption] = useState<string>('max');
   const [quality, setQuality] = useState<string>('less');
+  const [selectedOption, setSelectedOption] = useState<string>('max');
+  const sizeOptions = [
+    { value: 'max', label: 'Maximum compression' },
+    { value: 'email', label: 'Optimize file size for email' }
+  ];
+  const qualityOptions = [
+    { value: 'less', label: 'less quality' },
+    { value: 'medium', label: 'medium quality' },
+    { value: 'high', label: 'high quality' }
+  ];
+  const emailSizeOptions = [
+    { value: '10MB', label: 'under 10MB' },
+    { value: '5MB', label: 'under 5MB' },
+    { value: '2MB', label: 'under 2MB' }
+  ];
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
+
+  const handleOptionChange = (e: any) => {
+    setSelectedOption(e.target.value);
+    setSizeOption(e.target.value);
+  };
 
   return (
       <div className="mt-6">
@@ -27,61 +49,33 @@ const ReduceSizeAction: React.FC<ReduceSizeActionProps> = ({ action, onDelete })
 
         <div className="flex items-center space-x-4">
           <div className="flex-grow">
-            <div className="relative">
-              <select
-                  value={sizeOption}
-                  onChange={(e) => setSizeOption(e.target.value)}
-                  className="appearance-none bg-[#2d2d2d] border border-[#3c3c3c] text-white py-2 px-4 pr-10 rounded-xl w-full focus:outline-none focus:bg-[#3c3c3c] shadow-sm transition text-sm"
-              >
-                <option value="max">Maximum compression</option>
-                <option value="email">Optimize file size for email</option>
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-400">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-            </div>
+            <StyledDropdown
+              value={selectedOption}
+              onChange={handleOptionChange}
+              options={sizeOptions}
+              disabled={isProcessing}
+            />
           </div>
 
           {sizeOption === 'max' && (
               <div className="w-40">
-                <div className="relative">
-                  <select
-                      value={quality}
-                      onChange={(e) => setQuality(e.target.value)}
-                      className="appearance-none bg-[#2d2d2d] border border-[#3c3c3c] text-white py-2 px-4 pr-10 rounded-xl w-full focus:outline-none focus:bg-[#3c3c3c] shadow-sm transition text-sm"
-                  >
-                    <option value="less">less quality</option>
-                    <option value="medium">medium quality</option>
-                    <option value="high">high quality</option>
-                  </select>
-                  <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-400">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </div>
-                </div>
+                <StyledDropdown
+                  value={quality}
+                  onChange={(e) => setQuality(e.target.value)}
+                  options={qualityOptions}
+                  disabled={isProcessing}
+                />
               </div>
           )}
 
           {sizeOption === 'email' && (
               <div className="w-40">
-                <div className="relative">
-                  <select
-                      value="10MB"
-                      className="appearance-none bg-[#2d2d2d] border border-[#3c3c3c] text-white py-2 px-4 pr-10 rounded-xl w-full focus:outline-none focus:bg-[#3c3c3c] shadow-sm transition text-sm"
-                  >
-                    <option value="10MB">under 10MB</option>
-                    <option value="5MB">under 5MB</option>
-                    <option value="2MB">under 2MB</option>
-                  </select>
-                  <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-400">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </div>
-                </div>
+                <StyledDropdown
+                  value="10MB"
+                  onChange={() => {}}
+                  options={emailSizeOptions}
+                  disabled={true}
+                />
               </div>
           )}
         </div>

@@ -1,0 +1,43 @@
+.selectWrapper {
+  position: relative;
+  width: 100%;
+}
+
+.select {
+  background: #1e1e1e;
+  border: 1.5px solid #3c3c3c;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 500;
+  border-radius: 12px;
+  padding: 10px 40px 10px 16px;
+  width: 100%;
+  appearance: none;
+  outline: none;
+  transition: border-color 0.18s;
+}
+.select:focus {
+  border-color: #a259ff;
+}
+
+.option {
+  background: #232032;
+  color: #fff;
+  font-size: 15px;
+}
+
+.selectChevron {
+  pointer-events: none;
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  color: #bfbfbf;
+}
+
+.chevronIcon {
+  width: 20px;
+  height: 20px;
+} 
