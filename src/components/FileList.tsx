@@ -4,6 +4,8 @@ import { FileType, ConversionOption, ProcessStatus } from '../types';
 import MobileFileItem from './MobileFileItem';
 import DraggableFileItem from './DraggableFileItem';
 import { useFiles } from '../context';
+import styles from './FileList.module.css';
+import StyledDropdown from './StyledDropdown';
 
 interface FileListProps {
     files: FileType[];
@@ -112,143 +114,44 @@ const FileList: React.FC<FileListProps> = ({
     };
 
     return (
-        <div className="rounded-2xl bg-[#232324] shadow-lg p-0 w-full max-w-2xl mx-auto overflow-hidden border border-[#3c3c3c]">
-            {files.length > 0 && (
-                <div className="mb-2 text-sm text-gray-400 flex items-center px-6 pt-6">
-                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-                    </svg>
-                    Drag to reorder files
-                </div>
-            )}
-
-            {/* Mobile layout */}
-            {isMobile ? (
-                <div className="px-4 pb-4">
-                    {displayFiles.map((file) => (
-                        <MobileFileItem
-                            key={file.id}
-                            file={file}
-                            onDeleteFile={onDeleteFile}
-                            onConvertTo={onConvertTo}
-                            onPreviewFile={onPreviewFile}
-                        />
-                    ))}
-                </div>
-            ) : (
-                /* Desktop layout */
-                <>
-                    <div className="grid grid-cols-12 text-xs text-gray-400 px-6 pt-4 pb-2">
-                        <div className="col-span-1"></div> {/* Empty column for drag handle */}
-                        <div className="col-span-1">Format</div>
-                        <div className="col-span-4">File name</div>
-                        {files.some(f => f.status !== ProcessStatus.NotStarted) && (
-                            <div className="col-span-3">Progress</div>
-                        )}
-                        <div className="col-span-2 text-right">Size</div>
-                        <div className="col-span-1 text-center">Delete</div>
+        <div className={styles.fileListContainer}>
+            <div className={styles.headerRow}>
+                <div>Format</div>
+                <div>File name</div>
+                <div>Size</div>
+                <div>Delete</div>
+                <div>Convert to</div>
+            </div>
+            {displayFiles.map((file) => (
+                <div key={file.id} className={styles.fileRow}>
+                    <div className={styles.iconCell}>
+                        <span className={styles.fileIcon}>{renderFileIcon(file.format)}</span>
                     </div>
-
-                    {displayFiles.map((file, index) => (
-                        <DraggableFileItem
-                            key={file.id}
-                            file={file}
-                            index={index}
-                            onDragStart={handleDragStart}
-                            onDragEnter={handleDragEnter}
-                            onDragEnd={handleDragEnd}
-                            isDragging={draggedIndex === index}
-                            className="mb-2"
-                        >
-                            <div
-                                className="grid grid-cols-12 items-center bg-[#1e1e1e] px-6 py-4 rounded-xl mb-2 shadow-sm hover:bg-[#232324] transition-colors"
-                            >
-                                <div className="col-span-1 flex items-center">
-                                    {renderFileIcon(file.format)}
-                                </div>
-
-                                <div className="col-span-4 truncate pr-4 text-white font-medium">
-                                    {file.name}
-                                </div>
-
-                                {files.some(f => f.status !== ProcessStatus.NotStarted) && (
-                                    <div className="col-span-3">
-                                        {file.status === ProcessStatus.InProgress && (
-                                            <div className="w-full bg-[#2d2d2d] rounded-full h-2 overflow-hidden">
-                                                <div
-                                                    className="bg-brand-500 h-2 rounded-full transition-all duration-300"
-                                                    style={{ width: `${file.progress}%` }}
-                                                ></div>
-                                            </div>
-                                        )}
-                                        {file.status === ProcessStatus.Completed && (
-                                            <div className="flex items-center">
-                                                <div className="w-full bg-brand-500 rounded-full h-2"></div>
-                                                <svg className="w-5 h-5 ml-2 text-brand-500" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                                </svg>
-                                            </div>
-                                        )}
-                                        {file.status === ProcessStatus.NotStarted && (
-                                            <div className="text-right pr-4">
-                                                <span className="text-gray-400">{formatSize(file.size)}</span>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-
-                                <div className="col-span-2 text-right text-gray-300 font-medium">
-                                    {formatSize(file.size)}
-                                </div>
-                                <div className="col-span-1 flex justify-center">
-                                    <button onClick={() => onDeleteFile(file.id)} className="text-gray-400 hover:text-red-500 transition-colors">
-                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
-                                    </button>
-                                </div>
-
-                                {/* Convert to dropdown - shown in the correct column */}
-                                <div className="col-span-1 flex justify-center">
-                                    <div className="relative w-full max-w-[120px]">
-                                        <select
-                                            value={file.convertTo || 'None'}
-                                            onChange={(e) => {
-                                                const value = e.target.value as ConversionOption;
-                                                onConvertTo(file.id, value === 'None' ? null : value);
-                                            }}
-                                            className="appearance-none bg-[#2d2d2d] border border-[#3c3c3c] text-white py-2 px-4 pr-10 rounded-xl w-full focus:outline-none focus:bg-[#3c3c3c] shadow-sm transition text-sm"
-                                        >
-                                            <option value="None">Convert to...</option>
-                                            <option value="pdf">PDF</option>
-                                            {file.format === 'image' && (
-                                                <option value="webp">WebP</option>
-                                            )}
-                                            {file.format === 'docx' && (
-                                                <>
-                                                    <option value="txt">Text</option>
-                                                    <option value="pdf">PDF</option>
-                                                </>
-                                            )}
-                                            {file.format === 'xlsx' && (
-                                                <>
-                                                    <option value="csv">CSV</option>
-                                                    <option value="json">JSON</option>
-                                                </>
-                                            )}
-                                        </select>
-                                        <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-400">
-                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                                            </svg>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </DraggableFileItem>
-                    ))}
-                </>
-            )}
+                    <div className={styles.filenameCell}>{file.name}</div>
+                    <div className={styles.sizeCell}>{formatSize(file.size)}</div>
+                    <div className={styles.deleteCell}>
+                        <button className={styles.deleteButton} onClick={() => onDeleteFile(file.id)}>
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div className={styles.dropdownCell}>
+                        <StyledDropdown
+                            value={file.convertTo || 'None'}
+                            onChange={(e) => onConvertTo(file.id, e.target.value === 'None' ? null : e.target.value)}
+                            options={[
+                                { value: 'None', label: 'None' },
+                                { value: 'PDF', label: 'PDF' },
+                                { value: 'DOCX', label: 'DOCX' },
+                                { value: 'PNG', label: 'PNG' },
+                                { value: 'JPEG', label: 'JPEG' },
+                                { value: 'XLS', label: 'XLS' }
+                            ]}
+                        />
+                    </div>
+                </div>
+            ))}
         </div>
     );
 };

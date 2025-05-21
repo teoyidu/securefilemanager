@@ -110,3 +110,44 @@ code {
   background-color: var(--color-border);
   margin: 1.5rem 0;
 }
+
+/* Brand color classes for purple accent */
+.bg-brand-500 {
+  background-color: #a259ff !important;
+  color: #fff !important;
+}
+.text-brand-500 {
+  color: #a259ff !important;
+}
+.border-brand-500 {
+  border-color: #a259ff !important;
+}
+.focus\:ring-brand-500:focus {
+  box-shadow: 0 0 0 2px #a259ff !important;
+}
+.hover\:bg-brand-500\/80:hover {
+  background-color: #8e3fff !important;
+  color: #fff !important;
+}
+.hover\:bg-brand-600:hover {
+  background-color: #7c2cff !important;
+  color: #fff !important;
+}
+.hover\:bg-brand-500\/10:hover {
+  background-color: rgba(162, 89, 255, 0.10) !important;
+  color: #fff !important;
+}
+/* Utility for brand buttons */
+.btn-brand {
+  background-color: #a259ff !important;
+  color: #fff !important;
+}
+
+/* Ensure brand buttons have white text on hover, even if text-brand-500 is present */
+button.text-brand-500,
+button .text-brand-500,
+button.text-brand-500:active,
+button.text-brand-500:focus,
+button.text-brand-500:hover {
+  color: #fff !important;
+}

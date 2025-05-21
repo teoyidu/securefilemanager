@@ -10,6 +10,7 @@ import ResizeImagesAction from './actions/ResizeImagesAction';
 import AddActionMenu from './AddActionMenu';
 import DraggableActionItem from './DraggableActionItem';
 import { useActions } from '../context';
+import styles from './ActionPanel.module.css';
 
 interface ActionPanelProps {
   actions: ActionType[];
@@ -184,38 +185,38 @@ const ActionPanel: React.FC<ActionPanelProps> = ({
   };
 
   return (
-      <div className="rounded-2xl bg-[#232324] shadow-lg p-8 w-full max-w-2xl mx-auto mt-8 mb-4 border border-[#3c3c3c] relative">
+      <div className={styles.actionPanelBg}>
         {actions.length > 0 && (
-            <div className="mb-4 text-sm text-gray-400 flex items-center">
-              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className={styles.dragHint}>
+              <svg className={styles.dragIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
               </svg>
               Drag to reorder actions
             </div>
         )}
 
-        <div className="space-y-4">
+        <div className={styles.actionList}>
           {actions.map((action, index) => renderAction(action, index))}
         </div>
 
         {/* Add action floating button */}
-        <div className="absolute right-8 bottom-8">
+        <div className={styles.addActionFabWrapper}>
           <button
-            className="bg-brand-500 hover:bg-brand-500/80 text-white rounded-full w-12 h-12 flex items-center justify-center shadow-lg text-3xl font-bold transition-all focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer"
+            className={styles.addActionFab}
             onClick={() => setShowAddMenu(!showAddMenu)}
             aria-label="Add action"
           >
             +
           </button>
           {showAddMenu && (
-            <div className="absolute z-10 right-0 mt-2 w-64 bg-[#232324] rounded-xl shadow-xl border border-[#3c3c3c] p-4 flex flex-col space-y-2">
+            <div className={styles.addActionMenu}>
               {actionOptions.map(option => (
                 <button
                   key={option.id}
-                  className="flex items-center px-4 py-3 rounded-lg hover:bg-brand-500/10 text-left text-white transition-colors"
+                  className={styles.addActionMenuItem}
                   onClick={() => handleAddAction(option.type)}
                 >
-                  <span className="mr-3">{option.icon}</span>
+                  <span className={styles.addActionMenuIcon}>{option.icon}</span>
                   {option.title}
                 </button>
               ))}

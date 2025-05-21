@@ -1,40 +1,103 @@
 // src/components/StyledDropdown.tsx
 import React from 'react';
+import Select from 'react-select';
+import styles from './StyledDropdown.module.css';
+
+interface OptionType {
+    value: string;
+    label: string;
+}
 
 interface StyledDropdownProps {
     value: string;
-    onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-    options: {value: string, label: string}[];
+    onChange: (e: any) => void;
+    options: OptionType[];
     className?: string;
     disabled?: boolean;
 }
 
+const customStyles = {
+    control: (provided: any, state: any) => ({
+        ...provided,
+        backgroundColor: '#2d2d2d',
+        borderColor: '#3c3c3c',
+        borderRadius: 12,
+        minHeight: 40,
+        boxShadow: state.isFocused ? '0 0 0 2px #a259ff' : 'none',
+        color: '#fff',
+        fontSize: 15,
+        fontWeight: 500,
+        paddingLeft: 2,
+        paddingRight: 2,
+        transition: 'border-color 0.2s',
+        cursor: state.isDisabled ? 'not-allowed' : 'pointer',
+    }),
+    singleValue: (provided: any) => ({
+        ...provided,
+        color: '#fff',
+    }),
+    menu: (provided: any) => ({
+        ...provided,
+        backgroundColor: '#232032',
+        borderRadius: 12,
+        marginTop: 2,
+        zIndex: 10,
+    }),
+    option: (provided: any, state: any) => ({
+        ...provided,
+        backgroundColor: state.isSelected
+            ? '#a259ff'
+            : state.isFocused
+            ? '#2d2d2d'
+            : 'transparent',
+        color: state.isSelected ? '#fff' : '#fff',
+        fontWeight: state.isSelected ? 600 : 400,
+        cursor: 'pointer',
+        fontSize: 15,
+        padding: '10px 16px',
+    }),
+    dropdownIndicator: (provided: any) => ({
+        ...provided,
+        color: '#bfbfbf',
+        paddingRight: 8,
+    }),
+    indicatorSeparator: () => ({ display: 'none' }),
+    input: (provided: any) => ({
+        ...provided,
+        color: '#fff',
+    }),
+    placeholder: (provided: any) => ({
+        ...provided,
+        color: '#bfbfbf',
+    }),
+};
+
 const StyledDropdown: React.FC<StyledDropdownProps> = ({
-                                                           value,
-                                                           onChange,
-                                                           options,
-                                                           className = '',
-                                                           disabled = false
-                                                       }) => {
+    value,
+    onChange,
+    options,
+    className = '',
+    disabled = false,
+}) => {
+    const selectedOption = options.find((opt) => opt.value === value) || null;
     return (
-        <div className={`relative ${className}`}>
-            <select
-                value={value}
-                onChange={onChange}
-                disabled={disabled}
-                className="appearance-none bg-[#2d2d2d] border border-[#3c3c3c] text-white py-2 px-4 pr-10 rounded-xl w-full focus:outline-none focus:bg-[#3c3c3c] shadow-sm transition disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-                {options.map(option => (
-                    <option key={option.value} value={option.value}>
-                        {option.label}
-                    </option>
-                ))}
-            </select>
-            <div className="select-arrow pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-400">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                </svg>
-            </div>
+        <div className={styles.dropdownWrapper}>
+            <Select
+                value={selectedOption}
+                onChange={(option) => {
+                    if (option) {
+                        onChange({ target: { value: option.value } });
+                    } else {
+                        onChange({ target: { value: '' } });
+                    }
+                }}
+                options={options}
+                isDisabled={disabled}
+                classNamePrefix="custom-select"
+                menuPlacement="auto"
+                isSearchable={false}
+                styles={customStyles}
+            />
         </div>
     );
 };

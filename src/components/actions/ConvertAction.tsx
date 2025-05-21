@@ -11,6 +11,18 @@ interface ConvertActionProps {
 const ConvertAction: React.FC<ConvertActionProps> = ({ action, onDelete }) => {
   const [conversionType, setConversionType] = useState<string>('separately');
   const [selectedFormat, setSelectedFormat] = useState<string>('PDF');
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
+
+  const formatOptions = [
+    { value: 'PDF', label: 'PDF' },
+    { value: 'DOCX', label: 'DOCX' },
+    { value: 'PNG', label: 'PNG' },
+    { value: 'JPEG', label: 'JPEG' }
+  ];
+
+  const handleFormatChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedFormat(e.target.value);
+  };
 
   return (
       <div className="mt-6 bg-[#1e1e1e] border border-[#3c3c3c] rounded-md p-4">
@@ -34,20 +46,14 @@ const ConvertAction: React.FC<ConvertActionProps> = ({ action, onDelete }) => {
                 { value: 'single', label: 'Combine all into single PDF file' },
                 { value: 'pdf-separate', label: 'Create separate PDF files' }
               ]}
-              className="flex-grow"
           />
 
           {conversionType !== 'single' && conversionType !== 'pdf-separate' && (
               <StyledDropdown
                   value={selectedFormat}
                   onChange={(e) => setSelectedFormat(e.target.value)}
-                  options={[
-                    { value: 'PDF', label: 'PDF' },
-                    { value: 'DOCX', label: 'DOCX' },
-                    { value: 'PNG', label: 'PNG' },
-                    { value: 'JPEG', label: 'JPEG' }
-                  ]}
-                  className="w-32"
+                  options={formatOptions}
+                  disabled={isProcessing}
               />
           )}
         </div>

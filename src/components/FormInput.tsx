@@ -1,5 +1,6 @@
 // src/components/FormInput.tsx
 import React, { useState, useEffect } from 'react';
+import styles from './FormInput.module.css';
 
 interface FormInputProps {
     type: 'text' | 'number' | 'email' | 'select';
@@ -90,26 +91,26 @@ const FormInput: React.FC<FormInputProps> = ({
             )}
 
             {type === 'select' ? (
-                <div className="relative">
+                <div className={styles.selectWrapper}>
                     <select
                         id={id}
                         name={name}
                         value={value}
                         onChange={handleChange}
                         onBlur={handleBlur}
-                        className={inputClasses}
+                        className={styles.select}
                         required={required}
                         aria-invalid={touched && error ? 'true' : 'false'}
                         aria-describedby={touched && error ? `${id}-error` : undefined}
                     >
                         {options.map(option => (
-                            <option key={option.value} value={option.value}>
+                            <option key={option.value} value={option.value} className={styles.option}>
                                 {option.label}
                             </option>
                         ))}
                     </select>
-                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className={styles.selectChevron}>
+                        <svg className={styles.chevronIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                         </svg>
                     </div>

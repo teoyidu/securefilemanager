@@ -1,6 +1,7 @@
 // src/components/actions/FileRenameAction.tsx
 import React, { useState } from 'react';
 import { ActionType } from '../../types';
+import StyledDropdown from '../StyledDropdown';
 
 interface FileRenameActionProps {
   action: ActionType;
@@ -10,6 +11,12 @@ interface FileRenameActionProps {
 const FileRenameAction: React.FC<FileRenameActionProps> = ({ action, onDelete }) => {
   const [renameOption, setRenameOption] = useState<string>('before');
   const [prefix, setPrefix] = useState<string>('Phase1Handoff - ');
+
+  const renameOptions = [
+    { value: 'before', label: 'Add text before file names' },
+    { value: 'after', label: 'Add text after file names' },
+    { value: 'replace', label: 'Replace text in file names' }
+  ];
 
   return (
       <div className="mt-6">
@@ -28,20 +35,11 @@ const FileRenameAction: React.FC<FileRenameActionProps> = ({ action, onDelete })
         <div className="space-y-4">
           <div className="flex-grow">
             <div className="relative">
-              <select
+              <StyledDropdown
                   value={renameOption}
                   onChange={(e) => setRenameOption(e.target.value)}
-                  className="appearance-none bg-[#2d2d2d] border border-[#3c3c3c] text-white py-2 px-4 pr-8 rounded w-full focus:outline-none focus:bg-[#3c3c3c]"
-              >
-                <option value="before">Add text before file names</option>
-                <option value="after">Add text after file names</option>
-                <option value="replace">Replace text in file names</option>
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
+                  options={renameOptions}
+              />
             </div>
           </div>
 
